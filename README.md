@@ -11,10 +11,14 @@ Dispatxh app for generators in the Upland Metaverse!
         h1, h2, h3 { color: #2c3e50; margin-top: 0; }
         .container { max-width: 1200px; margin: auto; }
         
+        /* Updated Header with Logo Group */
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; background: #2c3e50; color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; }
         .header-title-group { display: flex; align-items: center; }
-        .logo-placeholder { height: 50px; width: auto; margin-right: 15px; border-radius: 4px; background-color: white; padding: 2px; }
         
+        /* Update the logo dimensions and styling for the new image */
+        .logo-placeholder { height: 70px; width: auto; margin-right: 18px; border-radius: 4px; }
+        
+        /* Stats Bar */
         .stats-bar { background: #34495e; color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         #total-spark-stat { color: #f1c40f; font-size: 1.4em; } 
 
@@ -60,7 +64,7 @@ Dispatxh app for generators in the Upland Metaverse!
 <div class="container">
     <div class="dashboard-header">
         <div class="header-title-group">
-            <img src="https://via.placeholder.com/150x50/34495e/ffffff?text=Raytown+Construction" alt="Raytown Construction Logo" class="logo-placeholder" id="company-logo">
+            <img src="https://via.placeholder.com/150x50/34495e/ffffff?text=Raytown+Dispatch" alt="Raytown Construction Logo" class="logo-placeholder" id="company-logo">
             <h2 style="margin: 0;">Dispatch Command</h2>
         </div>
         <div id="live-clock" style="font-weight: bold; font-size: 1.2em;"></div>
@@ -117,6 +121,7 @@ Dispatxh app for generators in the Upland Metaverse!
 </div>
 
 <script>
+    // Live Clock Logic
     function updateClock() {
         const now = new Date();
         document.getElementById('live-clock').innerText = now.toLocaleString('en-US');
@@ -124,12 +129,14 @@ Dispatxh app for generators in the Upland Metaverse!
     setInterval(updateClock, 1000);
     updateClock();
 
+    // Generator Rules (Sparklet)
     const sparkletRules = {
         green: { min: 5000, max: 30000 },
         red: { min: 10000, max: 30000 },
         yellow: { min: 15000, max: 30000 }
     };
 
+    // Property Database
     const properties = {
         green: [
             { name: "Luxury Modern House", value: 75000 }, { name: "Luxury Ranch House", value: 75000 },
@@ -179,6 +186,7 @@ Dispatxh app for generators in the Upland Metaverse!
     let activeProjects = [];
     let ledgerLog = [];
 
+    // Master Stats Update
     function updateDashboardStats() {
         let totalActiveSpark = 0;
         ledgerLog.forEach(proj => {
@@ -224,7 +232,7 @@ Dispatxh app for generators in the Upland Metaverse!
             address: addressInput,
             value: selectedProp.value,
             maxGens: maxGenerators,
-            currentGens: 0, // Track how many slots are filled
+            currentGens: 0, 
             timeListed: new Date().toLocaleString()
         };
 
@@ -304,7 +312,7 @@ Dispatxh app for generators in the Upland Metaverse!
         
         // Create an individual STAKE record for the Ledger
         const stakeRecord = {
-            id: Date.now() + Math.random(), // Unique ID for this specific stake
+            id: Date.now() + Math.random(), 
             parentId: proj.id,
             category: proj.category,
             name: proj.name,
@@ -346,10 +354,8 @@ Dispatxh app for generators in the Upland Metaverse!
         const now = Date.now();
         let hoursStaked = (now - stake.timestampAccepted) / (1000 * 60 * 60);
         
-        // Formula: Total Spark * Hours Staked = Total Contributed Spark Hours
         const sparkHoursContributed = stake.activeSpark * hoursStaked;
         
-        // New Split: 95% to Sub, 5% to Company
         let finalSubPayout = Math.floor(sparkHoursContributed * 0.95);
         let finalCompanyCut = Math.floor(sparkHoursContributed * 0.05);
 
