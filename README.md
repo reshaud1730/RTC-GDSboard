@@ -18,7 +18,7 @@ Dispatxh app for generators in the Upland Metaverse!
         
         /* Branded Logo Styling (using image_9.png as main logo) */
         .company-logo { height: 70px; width: auto; margin-right: 18px; border-radius: 4px; }
-        
+        <img width="2816" height="1536" alt="GDSlogo2" src="https://github.com/user-attachments/assets/8763c921-eab1-4dcd-99a8-0a6a1faa1da7" />
         /* Stats Bar */
         .stats-bar { background: #34495e; color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         #total-spark-stat { color: #f1c40f; font-size: 1.4em; } 
@@ -553,7 +553,7 @@ Dispatxh app for generators in the Upland Metaverse!
         document.body.removeChild(link);
     }
 </script>
-<img width="2816" height="1536" alt="GDSlogo2" src="https://github.com/user-attachments/assets/8763c921-eab1-4dcd-99a8-0a6a1faa1da7" />
+
 
 </body>
 </html>
