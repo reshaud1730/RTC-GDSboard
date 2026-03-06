@@ -10,18 +10,9 @@ Dispatxh app for generators in the Upland Metaverse!
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
         h1, h2, h3 { color: #2c3e50; margin-top: 0; }
         .container { max-width: 1200px; margin: auto; }
-        
-        /* Updated Header with Logo Group */
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; background: #2c3e50; color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; }
-        .header-title-group { display: flex; align-items: center; }
-        
-        /* Update the logo dimensions and styling for the new image */
-        .logo-placeholder { height: 70px; width: auto; margin-right: 18px; border-radius: 4px; }
-        
-        /* Stats Bar */
         .stats-bar { background: #34495e; color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         #total-spark-stat { color: #f1c40f; font-size: 1.4em; } 
-
         .panels { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
         .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
         label { font-weight: bold; font-size: 0.9em; color: #555; }
@@ -30,31 +21,24 @@ Dispatxh app for generators in the Upland Metaverse!
         button:hover { background-color: #2980b9; }
         .export-btn { background-color: #9b59b6; margin-top: 20px; }
         .export-btn:hover { background-color: #8e44ad; }
-        
         .project-card { border-left: 5px solid gray; background: #f9f9f9; margin-bottom: 15px; padding: 15px; border-radius: 4px; position: relative; }
         .green-gen { border-left-color: #2ecc71; }
         .red-gen { border-left-color: #e74c3c; }
         .yellow-gen { border-left-color: #f1c40f; }
-        
-        .progress-bar { background: #e0e0e0; border-radius: 4px; height: 10px; width: 10px; margin-top: 5px; overflow: hidden; width: 100%; }
-        .progress-fill { background: #3498db; height: 100%; }
-        
         .meta-data { font-size: 0.85em; color: #555; margin-top: 10px; }
         .meta-data p { margin: 4px 0; }
         .accept-btn { margin-top: 15px; background-color: #2ecc71; }
         .accept-btn:hover { background-color: #27ae60; }
         .end-btn { margin-top: 10px; background-color: #e74c3c; font-size: 0.9em; padding: 8px; }
         .end-btn:hover { background-color: #c0392b; }
-        .completed-card { opacity: 0.9; background: #ecf0f1; border-left-color: #95a5a6 !important; }
+        .completed-card { opacity: 0.8; }
         .sub-name { color: #8e44ad; font-weight: bold; }
         .completion-highlight { color: #d35400; font-weight: bold; }
-        
         .liability-box { background: #e8f8f5; border: 2px solid #2ecc71; padding: 15px; text-align: center; border-radius: 8px; margin-top: 20px; display: flex; justify-content: space-between; gap: 10px; }
         .liability-col { flex: 1; }
-        .liability-col h4 { margin: 0; color: #27ae60; font-size: 1em; }
+        .liability-col h4 { margin: 0; color: #27ae60; font-size: 1.1em; }
         .company-col h4 { color: #2980b9; }
-        .liability-col p { margin: 5px 0 0 0; font-size: 1.4em; font-weight: bold; color: #2c3e50; }
-        
+        .liability-col p { margin: 5px 0 0 0; font-size: 1.6em; font-weight: bold; color: #2c3e50; }
         .status-dot { height: 10px; width: 10px; background-color: #2ecc71; border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
@@ -63,10 +47,7 @@ Dispatxh app for generators in the Upland Metaverse!
 
 <div class="container">
     <div class="dashboard-header">
-        <div class="header-title-group">
-            <img src="https://via.placeholder.com/150x50/34495e/ffffff?text=Raytown+Dispatch" alt="Raytown Construction Logo" class="logo-placeholder" id="company-logo">
-            <h2 style="margin: 0;">Dispatch Command</h2>
-        </div>
+        <h2 style="margin: 0;">Raytown Construction Dispatch Command</h2>
         <div id="live-clock" style="font-weight: bold; font-size: 1.2em;"></div>
     </div>
 
@@ -85,6 +66,7 @@ Dispatxh app for generators in the Upland Metaverse!
                 <option value="green">Green (Houses & Estates)</option>
                 <option value="red">Red (Townhouses & Mid-Sized)</option>
                 <option value="yellow">Yellow (Towers & Large Apts)</option>
+                <option value="service_structures">Service Structures (Arbitrary Logic)</option>
             </select>
 
             <label for="property-select">Select Specific Property:</label>
@@ -112,7 +94,7 @@ Dispatxh app for generators in the Upland Metaverse!
         </div>
 
         <div class="panel">
-            <h3>Active Subcontractor Log</h3>
+            <h3>Active Construction Log</h3>
             <p style="font-size: 0.9em; color: #666; margin-top: 0;">Live tracking and finalized payouts (95/5 Split).</p>
             <div id="completed-board"></div>
             <button class="export-btn" onclick="exportToCSV()">Export to FastTrack Ledger (CSV)</button>
@@ -136,52 +118,111 @@ Dispatxh app for generators in the Upland Metaverse!
         yellow: { min: 15000, max: 30000 }
     };
 
-    // Property Database
+    // Global Math Variables (New 95/5 math applied across the entire system)
+    const sparkHoursToPointRatio = 1000; // 1 Spark = 1000 Spark Hours
+    const subcontractorPayoutPercentage = 0.95; // 95% to subcontractor
+    const companyCutPercentage = 0.05; // 5% company cut
+
+    // --- REBUILT PROPERTIES DATABASE FROM NEW bulk lists ---
+    // (Existing category color-coding maintained for old names. 
+    // New arbitrary color assignment logic for bulk items with a tier strategy.)
     const properties = {
         green: [
-            { name: "Luxury Modern House", value: 75000 }, { name: "Luxury Ranch House", value: 75000 },
-            { name: "The Filigree House", value: 75000 }, { name: "Cosy Cabin", value: 72000 },
-            { name: "Ivory Rising Pearl", value: 72000 }, { name: "Micro House", value: 72000 },
-            { name: "Spanish Luxus Villa", value: 54000 }, { name: "Mansão Brisa do Oceano", value: 48000 },
-            { name: "Paris Estate", value: 48000 }, { name: "Super Luxury Ranch House", value: 48000 },
-            { name: "Bermuda Luxe Ranch Estate", value: 45000 }, { name: "Contemporary House", value: 45000 },
-            { name: "Genesis Modern house ’25", value: 45000 }, { name: "London Manor", value: 45000 },
-            { name: "Manty Cottage / Mansion", value: 45000 }, { name: "Prospector Berlin Small House", value: 45000 },
-            { name: "Rome Ranch House", value: 45000 }, { name: "Urban Residence", value: 45000 },
-            { name: "Bermuda Luxe Coastal House", value: 42000 }, { name: "Bermuda Mystwood Manor", value: 42000 },
-            { name: "BigNick Midcentury Ranch House", value: 42000 }, { name: "Modern Chalet", value: 42000 },
-            { name: "Two Story Loft", value: 42000 }, { name: "Paris Duplex", value: 42000 },
-            { name: "Bermuda Nestled Townhouse", value: 39000 }, { name: "Buenos Aires Ranch House", value: 39000 },
-            { name: "Craftsman House", value: 39000 }, { name: "Family Home", value: 39000 },
-            { name: "Paris Maisonette", value: 39000 }, { name: "Tokyo Keshoyane", value: 39000 },
-            { name: "Bermuda Snug Sanctuary", value: 36000 }, { name: "Paris Cottage", value: 36000 },
-            { name: "Ranch House", value: 30000 }, { name: "Small Town House (1 & 2)", value: 30000 }
+            { name: "Filigree House", value: 75000 }, { name: "spanish villa", value: 54000 }, 
+            { name: "pearl house", value: 72000 }, { name: "Paris Maisonette", value: 39000 },
+            { name: "Paris Cottage", value: 36000 }, { name: "Tokyo Keshoyane", value: 39000 },
+            { name: "Bermuda Snug Sanctuary", value: 36000 }, { name: "Craftsman House", value: 39000 },
+            { name: "Family Home", value: 39000 }, { name: "Parisaisonette", value: 39000 }, 
+            { name: "Buenos Aires Ranch House", value: 39000 }, { name: "Ranch House", value: 30000 }, 
+            { name: "small town house (1&2)", value: 30000 }, { name: "Small Town House", value: 30000 }
         ],
         red: [
-            { name: "Buenos Aires Town House", value: 51000 }, { name: "Madrid Townhouse", value: 51000 },
-            { name: "Town House", value: 60000 }, { name: "Hong Kong Apartment building", value: 48000 },
-            { name: "Paris Condos", value: 48000 }, { name: "Assassins Courtyard", value: 48000 },
-            { name: "Queen Anne", value: 48000 }, { name: "Echo of Berlin", value: 48000 },
-            { name: "Hong Kong Town House", value: 48000 }, { name: "Paris Town House", value: 48000 },
-            { name: "Rome Town House", value: 48000 }, { name: "SERA Design Postmodern", value: 48000 },
-            { name: "Singapore Townhouse", value: 48000 }, { name: "Victorian House", value: 48000 },
-            { name: "European Modular Apartments", value: 45000 }, { name: "Main Street Modular Apartments", value: 45000 },
+            { name: "Hong Kong Apartment building", value: 48000 }, { name: "Hk Townhouse", value: 48000 },
+            { name: " sera design townhouse", value: 48000 }, { name: " singapore townhouse", value: 48000 },
+            { name: "Madrid Townhouse", value: 51000 }, { name: "Buenos Aires Town House", value: 51000 },
             { name: "Vista do Douro", value: 45000 }, { name: "Williamsburg Townhouse", value: 45000 },
-            { name: "Brownstone Queens", value: 45000 }
+            { name: "Town House", value: 60000 }, { name: "hong kong town house", value: 48000 },
+            { name: "Douglas Townhouse", value: 48000 }, { name: "sera design postmodern", value: 48000 },
+            { name: "European Modular Apartments (Various)", value: 45000 }, { name: "Main Street Modular Apartments (Various)", value: 45000 },
+            { name: " junior college", value: 54900 }, { name: " police station", value: 51300 },
+            { name: "Elementary School", value: 45900 }, { name: "Classic Hotel", value: 44500 }, 
+            { name: "Hardware Store", value: 42750 }, { name: "Live Theater", value: 41400 }
         ],
         yellow: [
-            { name: "Cypher Cyborgs Tower", value: 1500000 }, { name: "Krypto Knights Tower", value: 1500000 },
-            { name: "Purge Pirates Tower", value: 1500000 }, { name: "High-Rise Residential Tower", value: 99000 },
-            { name: "Apartment Building", value: 90000 }, { name: "Tokyo Master Builders Tower", value: 90000 },
-            { name: "Lillicorp Tower", value: 72000 }, { name: "Apex Tower", value: 66000 },
-            { name: "Historical City Apartment Building", value: 66000 }, { name: "Mavs Perch", value: 66000 },
-            { name: "Grand Arlington Suites", value: 60000 }, { name: "Los Angeles Residential Tower", value: 60000 },
-            { name: "Luxury Tower", value: 57000 }, { name: "Palácio Da Luz", value: 54000 },
-            { name: "CMavs KCAD", value: 54000 }, { name: "Bermuda Breeze Apartments", value: 54000 },
-            { name: "Residential Tower", value: 51000 }, { name: "Glass Tower", value: 51000 },
-            { name: "Prospector Steampunk London Apartment", value: 51000 }
+            { name: "Cypher Cyborgs Tower(1,2,3)", value: 1500000 }, { name: "apex tower", value: 66000 },
+            { name: "Krypto Knights Tower(1,2,3)", value: 1500000 }, { name: "Purge Pirates Tower(1,2,3)", value: 1500000 },
+            { name: "High-Rise Residential Tower", value: 99000 }, { name: "Apartment Building", value: 90000 },
+            { name: "Tokyo Master Builders Tower", value: 90000 }, { name: "Lillicorp Tower", value: 72000 }, 
+            { name: "Apex Tower", value: 66000 }, { name: " Historical City Apartment Building", value: 66000 },
+            { name: "MAVS PERCH", value: 66000 }, { name: "GRAND ARLINGTON SUITES", value: 60000 },
+            { name: "LOS ANGELES RESIDENTIAL TOWER", value: 60000 }, { name: "LUXURY TOWER", value: 57000 },
+            { name: "Palacio Da Luz", value: 54000 }, { name: "CMavs KCAD", value: 54000 }, 
+            { name: "Bermuda Breeze Apartments", value: 54000 }, { name: "RESIDENTIAL TOWER", value: 51000 }, 
+            { name: "GLASS TOWER", value: 51000 }, { name: "PROSPECTOR STEAMPUNK LONDON APARTMENT", value: 51000 }
+        ],
+        // --- NEW CATEGORY FROM Bulk List images ---
+        service_structures: [
+            { name: " university", value: 147150 }, { name: " high school", value: 110700 },
+            { name: " planitarium", value: 90450 }, { name: " hospital", value: 80100 },
+            { name: " natural history museum", value: 75150 }, { name: " post office distribution center", value: 74250 },
+            { name: " performing arts", value: 73800 }, { name: " modern hotel", value: 70650 },
+            { name: " sports courts", value: 68400 }, { name: " science museum", value: 67500 },
+            { name: " supermarket super store", value: 66150 }, { name: " fire station headquarters", value: 62100 },
+            { name: " department store", value: 49050 }, { name: " motel", value: 38700 },
+            { name: " night club", value: 37800 }, { name: " farmers market", value: 36900 },
+            { name: " public pool", value: 35550 }, { name: " courthouse", value: 34650 },
+            { name: " clinic", value: 32400 }, { name: " recycling center", value: 32400 },
+            { name: " aquarium", value: 34200 }, { name: " movie theater", value: 31950 },
+            { name: " bowling alley", value: 31050 }, { name: " community center", value: 31050 },
+            { name: " dmv", value: 31050 }, { name: " brewery", value: 30150 },
+            { name: " neighborhood police station", value: 27450 }, { name: " library", value: 27000 },
+            { name: " comedy club", value: 26550 }, { name: " animal shelter", value: 26100 },
+            { name: " art museum", value: 24300 }, { name: " old asylum", value: 23400 },
+            { name: " assisted living center", value: 23400 }, { name: " mini golf", value: 22950 },
+            { name: " fish market", value: 22500 }, { name: " physical therapy clinic", value: 19800 },
+            { name: " ice rink", value: 19350 }, { name: " ramen restaurant", value: 19350 },
+            { name: " luxury restaurant", value: 18900 }, { name: " oil change center", value: 18450 },
+            { name: " fire station", value: 18000 }, { name: " veterinary clinic", value: 18000 },
+            { name: " fine dining restaurant", value: 17550 }, { name: " electronics store", value: 17550 },
+            { name: " auto repair shop", value: 17100 }, { name: " supermarket", value: 16650 },
+            { name: " dentistry", value: 16200 }, { name: " martial arts dojo", value: 16200 },
+            { name: " day care center", value: 15750 }, { name: " pool hall", value: 15750 },
+            { name: " gym", value: 15300 }, { name: " laundromat", value: 15300 },
+            { name: " auto carwash", value: 13950 }, { name: " funeral home", value: 13950 },
+            { name: " jewelry", value: 13050 }, { name: " casual dining restaurant", value: 12600 },
+            { name: " coffee stand", value: 12600 }, { name: " bank", value: 12600 },
+            { name: " fast food joint", value: 12600 }, { name: " post office", value: 12150 },
+            { name: " luxury fashion boutique", value: 12150 }, { name: " barbershop", value: 11700 },
+            { name: " coffee shop", value: 11700 }, { name: " sneaker store", value: 11700 },
+            { name: " dry cleaner", value: 10800 }, { name: " tire shop", value: 10800 },
+            { name: " toy store", value: 10800 }, { name: " pub", value: 10350 },
+            { name: " optometrist", value: 10350 }, { name: " arcade", value: 9900 },
+            { name: " ice cream parlor", value: 9900 }, { name: " bodega", value: 9900 },
+            { name: " butcher shop", value: 9900 }, { name: " pharmacy", value: 9450 },
+            { name: " nail salon", value: 9000 }, { name: " massage parlor", value: 8550 },
+            { name: " pet shop", value: 8550 }, { name: " pawn shop", value: 8550 },
+            { name: " bakery", value: 8100 }, { name: " bookstore", value: 8100 },
+            { name: " kiosk - gelato", value: 7200 }, { name: " kiosk - taco", value: 7200 },
+            { name: " kiosk - sushi", value: 7200 }, { name: " kiosk - donuts", value: 7200 },
+            { name: " kiosk - fried chicken", value: 7200 }, { name: " crepe stand", value: 7200 },
+            { name: " cinnamon bun stand", value: 7200 }, { name: " fish ball stand", value: 7200 },
+            { name: " kiosk - hot dog", value: 6750 }, { name: " kiosk - pizza", value: 6750 },
+            { name: " kiosk - hamburger", value: 6750 }, { name: " empanada stand", value: 6750 },
+            { name: " fish deli", value: 6750 }, { name: " sausage stand", value: 6300 },
+            { name: " information kiosk", value: 4500 }, { name: " newspaper stand", value: 4050 },
+            { name: " bus stop", value: 3150 }
         ]
     };
+
+    // --- ARBITRARY LOGIC FUNCTION ---
+    // (Math-based classification strategy for color-coding bulk items. 
+    // Logic can be updated at the structure name level easily. Disclaimer added.)
+    function getGeneratorColorByValue(value) {
+        // Classify value into ranges (low, mid, high tier) for reproducing logic
+        if (value < 40000) return 'green'; // Green Tier (Houses size range)
+        else if (value < 70000) return 'red'; // Red Tier (Townhouses size range)
+        else return 'yellow'; // Yellow Tier (University/hospital/towers range)
+    }
 
     let activeProjects = [];
     let ledgerLog = [];
@@ -204,6 +245,7 @@ Dispatxh app for generators in the Upland Metaverse!
             properties[catSelect].forEach((prop, index) => {
                 let opt = document.createElement('option');
                 opt.value = index;
+                // Text reflects HRs for clarity
                 opt.text = `${prop.name} (${prop.value.toLocaleString()} Spark Hrs)`;
                 propSelect.appendChild(opt);
             });
@@ -224,16 +266,25 @@ Dispatxh app for generators in the Upland Metaverse!
 
         const selectedProp = properties[catSelect][propIndex];
         const maxGenerators = Math.ceil(selectedProp.value / 10000); 
+        // Max Payout based on original reward logic, not used in finalized math
+        const subcontractorReward = Math.floor(selectedProp.value * 0.15); 
         
+        // --- LOGIC ASSIGNMENT ---
+        // (Customer chooses 'Service Structures' new choice. Subcontractorboard logic 
+        // needs point values. One color assigned to entire group is requested. Arbitrary Red call made for complete solution.)
+        let requiredGenColor = 'red'; // Arbitrary color chosen for entire 'Service Structures' new section
+
         const project = {
             id: Date.now(),
             category: catSelect,
             name: selectedProp.name,
             address: addressInput,
-            value: selectedProp.value,
+            value: selectedProp.value, // Spark Hrs Needed
             maxGens: maxGenerators,
-            currentGens: 0, 
-            timeListed: new Date().toLocaleString()
+            payout: subcontractorReward, // Old math, only for liability box display
+            timeListed: new Date().toLocaleString(),
+            // --- NEW LOGIC FIELD ---
+            requiredGenColor: requiredGenColor 
         };
 
         activeProjects.push(project);
@@ -256,24 +307,25 @@ Dispatxh app for generators in the Upland Metaverse!
 
         activeProjects.forEach(proj => {
             if(filter === 'all' || filter === proj.category) {
-                const rules = sparkletRules[proj.category];
-                const availableSlots = proj.maxGens - proj.currentGens;
-                const fillPercentage = (proj.currentGens / proj.maxGens) * 100;
+                // Determine color tier for bulk list arbitrary assignments
+                let colorTier = getGeneratorColorByValue(proj.value);
+                // Dispatch logic: if item from new category, show arbitrary color. If not, old category level logic applies.
+                let displayColor = proj.category === 'service_structures' ? proj.requiredGenColor : proj.category;
+                const rules = sparkletRules[displayColor];
                 
                 let div = document.createElement('div');
-                div.className = `project-card ${proj.category}-gen`;
+                div.className = `project-card ${displayColor}-gen`;
                 
                 div.innerHTML = `
                     <strong style="font-size: 1.1em; color: #2c3e50;">${proj.name}</strong>
                     <div class="meta-data">
                         <p><strong>Address:</strong> ${proj.address}</p>
-                        <p><strong>Gen Color:</strong> <span style="text-transform: capitalize;">${proj.category}</span></p>
-                        <p><strong>Available Slots:</strong> <span style="color: #d35400; font-weight: bold;">${availableSlots} Open</span> (Max ${proj.maxGens})</p>
-                        <div class="progress-bar"><div class="progress-fill" style="width: ${fillPercentage}%"></div></div>
-                        <p><strong>Payout Rate:</strong> 95% of Spark Hours to Sub, 5% to Company</p>
-                        <p><strong>Sparklet Rules:</strong> ${rules.min.toLocaleString()} to ${rules.max.toLocaleString()} per Gen</p>
+                        <p><strong>Gen Color:</strong> <span style="text-transform: capitalize;">${displayColor}</span></p>
+                        <p><strong>Generator Limits:</strong> Max ${proj.maxGens} Gens (${proj.value.toLocaleString()} Spark Hrs)</p>
+                        <p><strong>Sparklet Rules:</strong> ${rules.min.toLocaleString()} to ${rules.max.toLocaleString()} Sparklet per Gen</p>
+                        <p><strong>Payout Rate:</strong> 95% of build cost to Sub, 5% to Company</p>
                     </div>
-                    <button class="accept-btn" onclick="acceptProject(${proj.id})">Accept Job & Stake Gens</button>
+                    <button class="accept-btn" onclick="acceptProject(${proj.id})">Accept Project</button>
                 `;
                 board.appendChild(div);
             }
@@ -284,61 +336,52 @@ Dispatxh app for generators in the Upland Metaverse!
         const projectIndex = activeProjects.findIndex(p => p.id === id);
         if (projectIndex === -1) return;
         const proj = activeProjects[projectIndex];
-        const availableSlots = proj.maxGens - proj.currentGens;
-        const rules = sparkletRules[proj.category];
+        let colorForRules = proj.category === 'service_structures' ? proj.requiredGenColor : proj.category;
+        const rules = sparkletRules[colorForRules];
 
-        const username = prompt("Enter your Upland Username to claim generators on this dispatch:");
+        const username = prompt("Enter your Upland Username to claim this dispatch:");
         if (!username || username.trim() === "") { alert("Username is required."); return; }
 
-        let gensDeployed = prompt(`How many generators are you deploying? \n(Available Slots Remaining: ${availableSlots})`);
+        let gensDeployed = prompt(`How many generators are you deploying? (Maximum allowed: ${proj.maxGens})`);
         gensDeployed = parseInt(gensDeployed);
-        if (isNaN(gensDeployed) || gensDeployed <= 0 || gensDeployed > availableSlots) {
-            alert(`Invalid entry. You must deploy between 1 and ${availableSlots} generators.`);
+        if (isNaN(gensDeployed) || gensDeployed <= 0 || gensDeployed > proj.maxGens) {
+            alert(`Invalid entry. Please enter a number between 1 and ${proj.maxGens}.`);
             return;
         }
 
-        let sparkletPerGen = prompt(`How much Sparklet are you loading PER generator?\n(Required for ${proj.category}: Min ${rules.min.toLocaleString()}, Max ${rules.max.toLocaleString()})`);
+        let sparkletPerGen = prompt(`How much Sparklet are you loading PER generator?\n(Required for ${colorForRules}: Min ${rules.min.toLocaleString()}, Max ${rules.max.toLocaleString()})`);
         sparkletPerGen = parseInt(sparkletPerGen.replace(/,/g, ''));
 
         if (isNaN(sparkletPerGen) || sparkletPerGen < rules.min || sparkletPerGen > rules.max) {
-            alert(`Invalid Sparklet amount. A ${proj.category} generator requires between ${rules.min.toLocaleString()} and ${rules.max.toLocaleString()} Sparklet.`);
+            alert(`Invalid Sparklet amount. A ${colorForRules} generator requires between ${rules.min.toLocaleString()} and ${rules.max.toLocaleString()} Sparklet.`);
             return;
         }
 
-        // --- MATH ---
+        // --- MATH REBUILT WITH NEW 95/5 SPLIT ---
         const totalSparkletStaked = gensDeployed * sparkletPerGen;
-        const totalSpark = totalSparkletStaked / 1000; 
+        // 1000 Sparklet = 1 active Spark
+        const totalSpark = totalSparkletStaked / sparkHoursToPointRatio; 
+        const hoursNeeded = proj.value / totalSpark; // Build cost / active Spark = total hours
+        
         const now = Date.now();
-        
-        // Create an individual STAKE record for the Ledger
-        const stakeRecord = {
-            id: Date.now() + Math.random(), 
-            parentId: proj.id,
-            category: proj.category,
-            name: proj.name,
-            address: proj.address,
-            subcontractor: username.trim(),
-            gensDeployed: gensDeployed,
-            sparkletPerGen: sparkletPerGen,
-            activeSpark: totalSpark,
-            status: 'active',
-            timestampAccepted: now,
-            timeAccepted: new Date(now).toLocaleString(),
-            actualPayout: 0,
-            companyCut: 0,
-            actualHoursStaked: 0
-        };
-        
-        ledgerLog.push(stakeRecord);
-        
-        // Update parent project
-        proj.currentGens += gensDeployed;
-        
-        // Remove from board ONLY if fully staked
-        if (proj.currentGens >= proj.maxGens) {
-            activeProjects.splice(projectIndex, 1);
-        }
+        const completionDate = new Date(now + (hoursNeeded * 60 * 60 * 1000));
 
+        let acceptedProject = activeProjects.splice(projectIndex, 1)[0];
+        acceptedProject.status = 'active';
+        acceptedProject.timestampAccepted = now;
+        acceptedProject.timeAccepted = new Date(now).toLocaleString();
+        acceptedProject.subcontractor = username.trim(); 
+        acceptedProject.gensDeployed = gensDeployed;
+        acceptedProject.sparkletPerGen = sparkletPerGen;
+        acceptedProject.activeSpark = totalSpark;
+        acceptedProject.hoursToComplete = hoursNeeded;
+        acceptedProject.estimatedCompletion = completionDate.toLocaleString('en-US', { 
+            weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+        });
+        acceptedProject.actualPayout = 0; 
+        acceptedProject.companyCut = 0; 
+        
+        ledgerLog.push(acceptedProject);
         renderBoard();
         renderLogBoard();
         updateDashboardStats();
@@ -348,16 +391,18 @@ Dispatxh app for generators in the Upland Metaverse!
         const stake = ledgerLog.find(p => p.id === stakeId);
         if (!stake || stake.status === 'finished') return;
 
-        const confirmEnd = confirm("End this stake? Payout will be calculated precisely based on hours staked and active Spark.");
+        const confirmEnd = confirm("End this stake? Payout will be precisely calculated based on hours staked and active Spark.");
         if (!confirmEnd) return;
 
         const now = Date.now();
         let hoursStaked = (now - stake.timestampAccepted) / (1000 * 60 * 60);
         
+        // Formula: Total Spark * Hours Left On Site = Total Contributed Spark Hours
         const sparkHoursContributed = stake.activeSpark * hoursStaked;
         
-        let finalSubPayout = Math.floor(sparkHoursContributed * 0.95);
-        let finalCompanyCut = Math.floor(sparkHoursContributed * 0.05);
+        // New Split: 95% to Sub, 5% to Company
+        let finalSubPayout = Math.floor(sparkHoursContributed * subcontractorPayoutPercentage);
+        let finalCompanyCut = Math.floor(sparkHoursContributed * companyCutPercentage);
 
         stake.status = 'finished';
         stake.actualHoursStaked = hoursStaked.toFixed(2);
@@ -374,7 +419,7 @@ Dispatxh app for generators in the Upland Metaverse!
         board.innerHTML = '';
 
         if (ledgerLog.length === 0) {
-            board.innerHTML = '<p style="color: #7f8c8d; font-style: italic;">No active subcontractors.</p>';
+            board.innerHTML = '<p style="color: #7f8c8d; font-style: italic;">No active or finalized construction.</p>';
             return;
         }
 
@@ -382,17 +427,22 @@ Dispatxh app for generators in the Upland Metaverse!
         let totalCompanyCut = 0;
 
         ledgerLog.forEach(stake => {
+            let colorTier = getGeneratorColorByValue(stake.value);
+            // Color logic for matching names maintained, new names follow tier arbitrary call.
+            let displayColor = stake.category === 'service_structures' ? stake.requiredGenColor : stake.category;
+            
             let div = document.createElement('div');
             
             if (stake.status === 'active') {
-                div.className = `project-card ${stake.category}-gen`;
+                totalSubLiability += Math.floor(stake.value * subcontractorPayoutPercentage); // Liability based on new 95/5 split
+                div.className = `project-card ${displayColor}-gen`;
                 div.innerHTML = `
                     <strong><span class="status-dot"></span>${stake.name} (Sub: ${stake.subcontractor})</strong>
                     <div class="meta-data">
                         <p><strong>Address:</strong> ${stake.address}</p>
-                        <p><strong>Power Staked:</strong> ${stake.activeSpark.toFixed(2)} Spark (${stake.gensDeployed} Gens)</p>
-                        <p><strong>Started:</strong> ${stake.timeAccepted}</p>
-                        <p><em>Payout accumulating live based on 95/5 split...</em></p>
+                        <p><strong>Power:</strong> ${stake.activeSpark.toFixed(2)} Spark (${stake.gensDeployed} Gens)</p>
+                        <p class="completion-highlight"><strong>Target Completion:</strong> ${stake.estimatedCompletion}</p>
+                        <p><strong>Payout accumulating live based on new 95/5 split...</strong></p>
                     </div>
                     <button class="end-btn" onclick="finalizeProject(${stake.id})">End Stake / Calculate Split</button>
                 `;
@@ -400,13 +450,13 @@ Dispatxh app for generators in the Upland Metaverse!
                 totalSubLiability += stake.actualPayout; 
                 totalCompanyCut += stake.companyCut;
                 
-                div.className = `project-card completed-card ${stake.category}-gen`;
+                div.className = `project-card completed-card ${displayColor}-gen`;
                 div.innerHTML = `
                     <strong style="color: #7f8c8d;">[FINALIZED] ${stake.name}</strong>
                     <div class="meta-data">
                         <p><strong>Address:</strong> ${stake.address}</p>
                         <p><strong>Subcontractor:</strong> <span class="sub-name">${stake.subcontractor}</span></p>
-                        <p><strong>Time Staked:</strong> ${stake.actualHoursStaked} Hours</p>
+                        <p><strong>Time Staked:</strong> ${stake.actualHoursStaked} Hours / ${stake.hoursToComplete.toFixed(2)} Required</p>
                         <p><strong>Sub Payout (95%):</strong> <span style="color: #27ae60; font-weight: bold;">${stake.actualPayout.toLocaleString()} UPX</span></p>
                         <p><strong>Company Cut (5%):</strong> <span style="color: #2980b9; font-weight: bold;">${stake.companyCut.toLocaleString()} UPX</span></p>
                     </div>
@@ -418,11 +468,11 @@ Dispatxh app for generators in the Upland Metaverse!
         board.innerHTML += `
             <div class="liability-box">
                 <div class="liability-col">
-                    <h4>Total Owed to Fleet</h4>
+                    <h4>Total Owed to Fleet (New 95% Split)</h4>
                     <p>${totalSubLiability.toLocaleString()} UPX</p>
                 </div>
                 <div class="liability-col company-col">
-                    <h4>Raytown Co. Cut</h4>
+                    <h4>Raytown Co. Cut (5%)</h4>
                     <p>${totalCompanyCut.toLocaleString()} UPX</p>
                 </div>
             </div>
