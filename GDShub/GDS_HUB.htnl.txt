@@ -12,7 +12,7 @@
         .company-logo { height: 70px; width: auto; margin-right: 18px; border-radius: 4px; }
         .stats-bar { background: #2c3e50; color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; border: 1px solid rgba(52, 152, 219, 0.2); }
         .panels { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
-        .panel { background: rgba(44, 62, 80, 0.9); backdrop-filter: blur(5px); padding: 20px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); flex: 1; min-width: 350px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .panel { background: rgba(44, 62, 80, 0.9); backdrop-filter: blur(5px); padding: 20px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); flex: 1; min-width: 350px; border: 1px solid rgba(255, 255, 255, 0.05); position: relative; }
         .admin-only { display: none; border: 2px solid #e67e22; }
         label { font-weight: bold; font-size: 0.9em; color: #bdc3c7; display: block; margin-top: 10px; }
         select, input { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #34495e; background-color: #1a1c23; color: #ecf0f1; font-size: 16px; box-sizing: border-box; }
@@ -26,7 +26,8 @@
         .green-gen { border-left-color: #2ecc71; }
         .red-gen { border-left-color: #e74c3c; }
         .yellow-gen { border-left-color: #f1c40f; }
-        .del-btn { background: #e74c3c; padding: 4px 8px; font-size: 10px; position: absolute; top: 5px; right: 5px; width: auto; margin: 0;}
+        .del-btn { background: #e74c3c; padding: 6px 10px; font-size: 12px; position: absolute; top: 10px; right: 10px; width: auto; margin: 0; border: 1px solid #c0392b; z-index: 10; cursor: pointer; border-radius: 4px;}
+        .del-btn:hover { background: #c0392b; }
     </style>
 </head>
 <body>
@@ -71,6 +72,7 @@
             <h3>Admin: Control Center</h3>
             <h4 style="color:#e67e22;">Pending Approval Queue</h4>
             <div id="pending-board"></div>
+            <hr style="border-color:#34495e;">
             <h4 style="color:#3498db;">Active Construction Watch</h4>
             <div id="active-stakes-admin"></div>
         </div>
@@ -119,27 +121,56 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
 
+    // FULL EXHAUSTIVE PROPERTY LIST RESTORED
     const properties = {
-        green: [{ name: "Luxury Modern House", value: 75000 }, { name: "Ranch House", value: 30000 }],
-        red: [{ name: "Town House", value: 60000 }, { name: "Madrid Townhouse", value: 51000 }],
-        yellow: [{ name: "Cypher Cyborgs Tower", value: 1500000 }, { name: "Apartment Building", value: 90000 }],
-        service_structures: [{ name: "University", value: 147150 }, { name: "Hospital", value: 80100 }, { name: "Fire HQ", value: 62100 }]
+        green: [
+            { name: "Luxury Modern House", value: 75000 }, { name: "Luxury Ranch House", value: 75000 }, { name: "The Filigree House", value: 75000 }, 
+            { name: "Cosy Cabin", value: 72000 }, { name: "Ivory Rising Pearl", value: 72000 }, { name: "Micro House", value: 72000 },
+            { name: "Spanish Luxus Villa", value: 54000 }, { name: "Mansao Brisa", value: 48000 }, { name: "Paris Estate", value: 48000 },
+            { name: "Super Luxury Ranch", value: 48000 }, { name: "Contemporary House", value: 45000 }, { name: "London Manor", value: 45000 },
+            { name: "Ranch House", value: 30000 }, { name: "Small Town House", value: 30000 }
+        ],
+        red: [
+            { name: "Town House", value: 60000 }, { name: "Madrid Townhouse", value: 51000 }, { name: "Buenos Aires Town House", value: 51000 },
+            { name: "Hong Kong Apartment", value: 48000 }, { name: "Paris Condos", value: 48000 }, { name: "Queen Anne", value: 48000 },
+            { name: "Victorian House", value: 48000 }, { name: "Vista do Douro", value: 45000 }, { name: "Brownstone Queens", value: 45000 }
+        ],
+        yellow: [
+            { name: "Cypher Cyborgs Tower", value: 1500000 }, { name: "Krypto Knights Tower", value: 1500000 }, { name: "Purge Pirates Tower", value: 1500000 },
+            { name: "High-Rise Tower", value: 99000 }, { name: "Apartment Building", value: 90000 }, { name: "Tokyo Builders Tower", value: 90000 },
+            { name: "Lillicorp Tower", value: 72000 }, { name: "Apex Tower", value: 66000 }, { name: "Grand Arlington Suites", value: 60000 }
+        ],
+        service_structures: [
+            { name: "University", value: 147150 }, { name: "High School", value: 110700 }, { name: "Planetarium", value: 90450 }, 
+            { name: "Hospital", value: 80100 }, { name: "Museum", value: 75150 }, { name: "Fire HQ", value: 62100 }, 
+            { name: "Supermarket Store", value: 66150 }, { name: "Courthouse", value: 34650 }, { name: "Clinic", value: 32400 },
+            { name: "Brewery", value: 30150 }, { name: "Library", value: 27000 }, { name: "Animal Shelter", value: 26100 },
+            { name: "Bank", value: 12600 }, { name: "Arcade", value: 9900 }, { name: "Kiosk", value: 7200 }, { name: "Bus Stop", value: 3150 }
+        ]
     };
 
     const sparkletRules = { green: { min: 5000, max: 30000 }, red: { min: 10000, max: 30000 }, yellow: { min: 15000, max: 30000 } };
+
+    // Global Snapshots to handle re-renders properly
+    window.pendingSnap = null;
+    window.activeSnap = null;
+    window.ledgerSnap = null;
 
     window.toggleAuth = () => {
         if (auth.currentUser) signOut(auth);
         else {
             const e = prompt("Admin Email:"), p = prompt("Password:");
-            if(e && p) signInWithEmailAndPassword(auth, e, p).catch(() => alert("Denied"));
+            if(e && p) signInWithEmailAndPassword(auth, e, p).catch(() => alert("Access Denied"));
         }
     };
 
     onAuthStateChanged(auth, u => {
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = u ? 'block' : 'none');
         document.getElementById('user-status').innerText = u ? "Mode: Admin Control" : "Mode: Fleet View";
-        renderAll(); 
+        // Re-render UI now that Auth state has changed to show/hide delete buttons
+        if(window.pendingSnap) renderPending(window.pendingSnap);
+        if(window.activeSnap) renderActive(window.activeSnap);
+        if(window.ledgerSnap) renderLedger(window.ledgerSnap);
     });
 
     window.submitForApproval = () => {
@@ -159,6 +190,7 @@
         }
         push(ref(db, 'pendingProjects'), { name, address: addr, value, color, maxGens: Math.ceil(value/10000) });
         alert("Build Submitted!");
+        document.getElementById('project-address').value = ""; // Clear input
     };
 
     window.deleteItem = (folder, id) => {
@@ -167,13 +199,22 @@
         }
     };
 
-    onValue(ref(db, 'pendingProjects'), snap => {
+    function renderPending(snap) {
         const b = document.getElementById('pending-board');
         b.innerHTML = "";
-        if(snap.val()) Object.entries(snap.val()).forEach(([id, d]) => {
-            const del = auth.currentUser ? `<button class="del-btn" onclick="window.deleteItem('pendingProjects','${id}')">X</button>` : "";
-            b.innerHTML += `<div class="project-card">${del}<strong>${d.name}</strong><br>${d.address}<br><button onclick="window.approve('${id}')" style="background:#2ecc71; padding:5px; font-size:12px;">Approve</button></div>`;
-        });
+        if(snap.val()) {
+            Object.entries(snap.val()).forEach(([id, d]) => {
+                const del = auth.currentUser ? `<button class="del-btn" onclick="window.deleteItem('pendingProjects','${id}')">🗑️ Delete</button>` : "";
+                b.innerHTML += `<div class="project-card">${del}<strong>${d.name}</strong><br>${d.address}<br><button onclick="window.approve('${id}')" style="background:#2ecc71; padding:5px; font-size:12px; margin-top:10px;">Approve & Deploy</button></div>`;
+            });
+        } else {
+            b.innerHTML = "<i>No pending approvals.</i>";
+        }
+    }
+
+    onValue(ref(db, 'pendingProjects'), snap => {
+        window.pendingSnap = snap;
+        renderPending(snap);
     });
 
     window.approve = id => {
@@ -182,23 +223,33 @@
         }, { onlyOnce: true });
     };
 
-    onValue(ref(db, 'activeProjects'), snap => {
+    function renderActive(snap) {
         const b = document.getElementById('dispatch-board');
-        b.innerHTML = snap.val() ? "" : "<i>No active projects.</i>";
+        b.innerHTML = "";
         window.activeProjectsArr = snap.val() ? Object.entries(snap.val()).map(([id, d]) => ({id, ...d})) : [];
-        if(snap.val()) Object.entries(snap.val()).forEach(([id, p]) => {
-            const del = auth.currentUser ? `<button class="del-btn" onclick="window.deleteItem('activeProjects','${id}')">X</button>` : "";
-            b.innerHTML += `<div class="project-card ${p.color}-gen" style="min-width:200px;">${del}<strong>${p.name}</strong><br>${p.address}<br>Slots: ${p.maxGens - p.currentGens} Open<br><button onclick="window.accept('${id}')" style="margin-top:10px; padding:5px; font-size:12px;">Claim Slot</button></div>`;
-        });
+        if(snap.val()) {
+            Object.entries(snap.val()).forEach(([id, p]) => {
+                const del = auth.currentUser ? `<button class="del-btn" onclick="window.deleteItem('activeProjects','${id}')">🗑️ Delete</button>` : "";
+                b.innerHTML += `<div class="project-card ${p.color}-gen" style="min-width:250px;">${del}<strong>${p.name}</strong><br>${p.address}<br>Slots: ${p.maxGens - p.currentGens} Open<br><button onclick="window.accept('${id}')" style="margin-top:10px; padding:8px; font-size:14px;">Claim Slot</button></div>`;
+            });
+        } else {
+            b.innerHTML = "<i>No active projects.</i>";
+        }
+    }
+
+    onValue(ref(db, 'activeProjects'), snap => {
+        window.activeSnap = snap;
+        renderActive(snap);
     });
 
     window.accept = id => {
         const p = window.activeProjectsArr.find(x => x.id === id);
         const user = prompt("Upland Username:");
+        if(!user) return;
         const gens = parseInt(prompt(`Gens? (Max ${p.maxGens - p.currentGens})`));
         const rules = sparkletRules[p.color];
         const sparklet = parseInt(prompt(`Sparklet per gen? (${rules.min}-${rules.max})`));
-        if(!user || !gens || !sparklet || sparklet < rules.min || sparklet > rules.max) return alert("Invalid");
+        if(!gens || !sparklet || sparklet < rules.min || sparklet > rules.max) return alert("Invalid entry.");
         const power = (gens * sparklet) / 1000;
         const hours = p.value / power;
         push(ref(db, 'ledgerLog'), { 
@@ -211,12 +262,8 @@
         else update(ref(db, `activeProjects/${id}`), { currentGens: nc });
     };
 
-    onValue(ref(db, 'ledgerLog'), snap => {
+    function renderLedger(snap) {
         window.ledgerArr = snap.val() ? Object.entries(snap.val()).map(([id, d]) => ({id, ...d})) : [];
-        renderAll();
-    });
-
-    function renderAll() {
         const adminList = document.getElementById('active-stakes-admin');
         const weeklyBody = document.getElementById('weekly-body');
         const monthlyBody = document.getElementById('monthly-body');
@@ -231,13 +278,12 @@
 
         window.ledgerArr.forEach(s => {
             userStats[s.subcontractor] = (userStats[s.subcontractor] || 0) + s.activeSpark;
-            const delBtn = isAdmin ? `<button class="del-btn" onclick="window.deleteItem('ledgerLog','${s.id}')">X</button>` : "";
+            const delBtn = isAdmin ? `<button class="del-btn" onclick="window.deleteItem('ledgerLog','${s.id}')">🗑️ Delete</button>` : "";
             
             if(s.status === 'active') {
                 totalPower += s.activeSpark;
-                const remaining = s.endTime - now;
-                const timeStr = remaining > 0 ? formatTime(remaining) : "DONE";
-                adminList.innerHTML += `<div class="project-card">${delBtn}<strong>${s.name} (${s.subcontractor})</strong><div class="timer-display">${timeStr}</div><button onclick="window.finalize('${s.id}')" style="background:#e67e22; padding:5px; font-size:12px;">Pay Out</button></div>`;
+                // Add "countdown-timer" class and "data-endtime" so setInterval can update text without destroying buttons
+                adminList.innerHTML += `<div class="project-card">${delBtn}<strong>${s.name} (${s.subcontractor})</strong><div class="timer-display countdown-timer" data-endtime="${s.endTime}">Loading Timer...</div><button onclick="window.finalize('${s.id}')" style="background:#e67e22; padding:8px; font-size:14px; margin-top:10px;">Finalize & Pay Out</button></div>`;
             } else {
                 const date = new Date(s.timestamp).toLocaleDateString();
                 const row = `<tr><td>${s.subcontractor}</td><td>${s.name}</td><td>${s.payout}</td><td>${date}</td><td class="admin-only">${delBtn}</td></tr>`;
@@ -252,45 +298,45 @@
         });
         document.getElementById('total-spark-stat').innerText = totalPower.toFixed(2);
         document.getElementById('top-member').innerText = topFleet[0] ? topFleet[0][0] : "---";
+        
+        // Ensure Admin columns are visible if logged in
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'table-cell' : 'none');
+        // Trigger a timer update immediately
+        updateTimers();
     }
+
+    onValue(ref(db, 'ledgerLog'), snap => {
+        window.ledgerSnap = snap;
+        renderLedger(snap);
+    });
 
     window.finalize = (id) => {
         const s = window.ledgerArr.find(x => x.id === id);
         const h = Math.min(s.hoursNeeded, (Date.now() - s.timestamp) / 3600000);
         const p = Math.floor((s.activeSpark * h) * 0.95);
-        
-        // NEW: Automatic PDF Generation on Finalize
         window.generateInvoice(s, p);
-
         update(ref(db, `ledgerLog/${id}`), { status: 'finished', payout: p, timestamp: Date.now() });
     };
 
     window.generateInvoice = (data, finalPayout) => {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        
         doc.setFontSize(22);
         doc.text("RAYTOWN CONSTRUCTION", 20, 20);
         doc.setFontSize(12);
         doc.text("Project Payout Receipt", 20, 30);
         doc.line(20, 35, 190, 35);
-        
         doc.text(`Subcontractor: ${data.subcontractor}`, 20, 50);
         doc.text(`Property: ${data.name}`, 20, 60);
         doc.text(`Address: ${data.address}`, 20, 70);
-        
         doc.text(`Generators Deployed: ${data.genCount}`, 20, 90);
         doc.text(`Sparklet per Gen: ${data.sparkletPerGen}`, 20, 100);
         doc.text(`Total Spark Power: ${data.activeSpark.toFixed(2)}`, 20, 110);
-        
         doc.setFontSize(16);
         doc.text(`TOTAL PAYOUT (95%): ${finalPayout.toLocaleString()} UPX`, 20, 130);
-        
         doc.setFontSize(10);
         doc.text("Thank you for building with the Raytown Fleet.", 20, 150);
         doc.text(`Issued: ${new Date().toLocaleString()}`, 20, 160);
-        
         doc.save(`${data.subcontractor}_Invoice.pdf`);
     };
 
@@ -311,13 +357,23 @@
         sel.innerHTML = "";
         if(cat && properties[cat]) {
             sel.disabled = false;
-            properties[cat].forEach((p, i) => sel.innerHTML += `<option value="${i}">${p.name} (${p.value})</option>`);
+            properties[cat].forEach((p, i) => sel.innerHTML += `<option value="${i}">${p.name} (${p.value.toLocaleString()} Hrs)</option>`);
         } else sel.disabled = true;
     };
 
+    // FIX: Update timers WITHOUT re-rendering the buttons so clicks aren't stolen!
+    function updateTimers() {
+        const now = Date.now();
+        document.querySelectorAll('.countdown-timer').forEach(el => {
+            const end = parseInt(el.getAttribute('data-endtime'));
+            const rem = end - now;
+            el.innerText = rem > 0 ? formatTime(rem) : "DONE - READY FOR PAYOUT";
+        });
+    }
+
     setInterval(() => { 
         document.getElementById('live-clock').innerText = new Date().toLocaleString(); 
-        renderAll(); 
+        updateTimers(); 
     }, 1000);
 </script>
 </body>
