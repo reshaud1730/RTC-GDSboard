@@ -10,7 +10,6 @@
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #16191f, #34495e); color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #34495e; }
         .company-logo { height: 70px; width: auto; margin-right: 18px; border-radius: 4px; }
         .stats-bar { background: #2c3e50; color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; border: 1px solid rgba(52, 152, 219, 0.2); }
-        #total-spark-stat { color: #f1c40f; }
         .panels { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
         .panel { background: rgba(44, 62, 80, 0.9); backdrop-filter: blur(5px); padding: 20px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); flex: 1; min-width: 350px; border: 1px solid rgba(255, 255, 255, 0.05); }
         .admin-only { display: none; border: 2px solid #e67e22; }
@@ -18,23 +17,22 @@
         select, input { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #34495e; background-color: #1a1c23; color: #ecf0f1; font-size: 16px; box-sizing: border-box; }
         button { background: linear-gradient(135deg, #3498db, #16191f); color: white; border: 1px solid #3498db; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; padding: 12px; border-radius: 5px; transition: 0.2s; }
         button:hover { box-shadow: 0 0 15px rgba(52, 152, 219, 0.7); }
-        .project-card { border-left: 5px solid #bdc3c7; background: #2c3e50; margin-bottom: 15px; padding: 15px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .project-card { border-left: 5px solid #bdc3c7; background: #2c3e50; margin-bottom: 15px; padding: 15px; border-radius: 4px; }
         .timer-display { font-family: 'Courier New', Courier, monospace; font-size: 1.3em; color: #2ecc71; font-weight: bold; margin: 10px 0; background: #16191f; padding: 5px; border-radius: 4px; text-align: center; border: 1px solid #34495e; }
+        .ledger-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; color: #ecf0f1; }
+        .ledger-table th, .ledger-table td { border: 1px solid #34495e; padding: 8px; text-align: left; }
+        .leaderboard-list { list-style: none; padding: 0; }
+        .leaderboard-item { display: flex; justify-content: space-between; padding: 10px; background: #1a1c23; margin-bottom: 5px; border-radius: 4px; border-left: 3px solid #f1c40f; }
         .green-gen { border-left-color: #2ecc71; }
         .red-gen { border-left-color: #e74c3c; }
         .yellow-gen { border-left-color: #f1c40f; }
-        .ledger-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; color: #ecf0f1; }
-        .ledger-table th, .ledger-table td { border: 1px solid #34495e; padding: 8px; text-align: left; }
-        .ledger-table th { background: #16191f; color: #3498db; }
-        .status-dot { height: 10px; width: 10px; background-color: #2ecc71; border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div style="text-align: right; margin-bottom: 10px; font-size: 0.85em; color: #bdc3c7;">
-        <span id="user-status">Fleet Access</span> | <a href="#" onclick="window.toggleAuth()" style="color:#3498db; text-decoration:none; font-weight:bold;">Admin Login</a>
+        <span id="user-status">Fleet View</span> | <a href="#" onclick="window.toggleAuth()" style="color:#3498db; text-decoration:none; font-weight:bold;">Admin Login</a>
     </div>
 
     <div class="dashboard-header">
@@ -46,8 +44,8 @@
     </div>
 
     <div class="stats-bar">
-        <span>Active Spark on Field:</span>
-        <span id="total-spark-stat">0.00 Spark</span>
+        <span>Active Spark on Field: <span id="total-spark-stat">0.00</span></span>
+        <span>Fleet Rank: <span style="color:#f1c40f;" id="top-member">---</span></span>
     </div>
 
     <div class="panels">
@@ -70,26 +68,33 @@
 
         <div class="panel admin-only">
             <h3>Admin: Control Center</h3>
-            <h4 style="color:#e67e22;">Pending Queue</h4>
-            <div id="pending-board"></div>
-            <h4 style="color:#3498db;">Active Construction Monitoring</h4>
+            <h4 style="color:#e67e22;">Pending Approval Queue</h4>
+            <div id="pending-board" style="max-height: 200px; overflow-y: auto;"></div>
+            <h4 style="color:#3498db;">Active Construction Watch</h4>
             <div id="active-stakes-admin"></div>
         </div>
 
         <div class="panel">
+            <h3>Fleet Leaderboard</h3>
+            <ul class="leaderboard-list" id="leaderboard-ui"></ul>
+        </div>
+    </div>
+
+    <div class="panels" style="margin-top:20px;">
+        <div class="panel" style="flex: 2;">
             <h3>Live Dispatch Board</h3>
-            <div id="dispatch-board"></div>
+            <div id="dispatch-board" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
         </div>
     </div>
 
     <div class="panels" style="margin-top:20px;">
         <div class="panel">
-            <h3 style="color:#2ecc71;">Weekly Performance Ledger</h3>
-            <table class="ledger-table"><thead id="weekly-head"></thead><tbody id="weekly-body"></tbody></table>
+            <h3 style="color:#2ecc71;">Weekly Ledger</h3>
+            <table class="ledger-table"><thead><tr><th>User</th><th>Property</th><th>Payout</th><th>Date</th></tr></thead><tbody id="weekly-body"></tbody></table>
         </div>
         <div class="panel">
-            <h3 style="color:#9b59b6;">Monthly Financial Ledger</h3>
-            <table class="ledger-table"><thead id="monthly-head"></thead><tbody id="monthly-body"></tbody></table>
+            <h3 style="color:#9b59b6;">Monthly Ledger</h3>
+            <table class="ledger-table"><thead><tr><th>User</th><th>Property</th><th>Payout</th><th>Date</th></tr></thead><tbody id="monthly-body"></tbody></table>
         </div>
     </div>
 </div>
@@ -114,24 +119,10 @@
     const auth = getAuth(app);
 
     const properties = {
-        green: [
-            { name: "Luxury Modern House", value: 75000 }, { name: "Luxury Ranch House", value: 75000 },
-            { name: "Cosy Cabin", value: 72000 }, { name: "Ranch House", value: 30000 },
-            { name: "Small Town House", value: 30000 }, { name: "Paris Estate", value: 48000 }
-        ],
-        red: [
-            { name: "Town House", value: 60000 }, { name: "Madrid Townhouse", value: 51000 },
-            { name: "Buenos Aires Town House", value: 51000 }, { name: "Victorian House", value: 48000 }
-        ],
-        yellow: [
-            { name: "Cypher Cyborgs Tower", value: 1500000 }, { name: "Krypto Knights Tower", value: 1500000 },
-            { name: "Apartment Building", value: 90000 }, { name: "High-Rise Tower", value: 99000 }
-        ],
-        service_structures: [
-            { name: "University", value: 147150 }, { name: "Hospital", value: 80100 },
-            { name: "Planetarium", value: 90450 }, { name: "Fire HQ", value: 62100 },
-            { name: "Supermarket", value: 66150 }, { name: "Kiosk", value: 7200 }
-        ]
+        green: [{ name: "Luxury Modern House", value: 75000 }, { name: "Ranch House", value: 30000 }],
+        red: [{ name: "Town House", value: 60000 }, { name: "Madrid Townhouse", value: 51000 }],
+        yellow: [{ name: "Cypher Cyborgs Tower", value: 1500000 }, { name: "Apartment Building", value: 90000 }],
+        service_structures: [{ name: "University", value: 147150 }, { name: "Hospital", value: 80100 }, { name: "Fire HQ", value: 62100 }]
     };
 
     const sparkletRules = { green: { min: 5000, max: 30000 }, red: { min: 10000, max: 30000 }, yellow: { min: 15000, max: 30000 } };
@@ -140,13 +131,13 @@
         if (auth.currentUser) signOut(auth);
         else {
             const e = prompt("Admin Email:"), p = prompt("Password:");
-            if(e && p) signInWithEmailAndPassword(auth, e, p).catch(() => alert("Access Denied"));
+            if(e && p) signInWithEmailAndPassword(auth, e, p).catch(() => alert("Denied"));
         }
     };
 
     onAuthStateChanged(auth, u => {
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = u ? 'block' : 'none');
-        document.getElementById('user-status').innerText = u ? "Mode: Administrator" : "Mode: Public Fleet";
+        document.getElementById('user-status').innerText = u ? "Mode: Admin" : "Mode: Fleet";
     });
 
     window.submitForApproval = () => {
@@ -165,14 +156,14 @@
             color = cat === 'service_structures' ? (value < 40000 ? 'green' : value < 70000 ? 'red' : 'yellow') : cat;
         }
         push(ref(db, 'pendingProjects'), { name, address: addr, value, color, maxGens: Math.ceil(value/10000) });
-        alert("Build Request Submitted Successfully!");
+        alert("Build Submitted!");
     };
 
     onValue(ref(db, 'pendingProjects'), snap => {
         const b = document.getElementById('pending-board');
         b.innerHTML = "";
         if(snap.val()) Object.entries(snap.val()).forEach(([id, d]) => {
-            b.innerHTML += `<div class="project-card"><strong>${d.name}</strong><br>${d.address}<br><button onclick="window.approve('${id}')" style="background:#2ecc71">Approve & Deploy</button></div>`;
+            b.innerHTML += `<div class="project-card"><strong>${d.name}</strong><br>${d.address}<br><button onclick="window.approve('${id}')" style="background:#2ecc71; padding:5px; font-size:12px;">Approve</button></div>`;
         });
     });
 
@@ -184,20 +175,20 @@
 
     onValue(ref(db, 'activeProjects'), snap => {
         const b = document.getElementById('dispatch-board');
-        b.innerHTML = snap.val() ? "" : "<i>No active dispatches available.</i>";
+        b.innerHTML = snap.val() ? "" : "<i>No active projects.</i>";
         window.activeProjectsArr = snap.val() ? Object.entries(snap.val()).map(([id, d]) => ({id, ...d})) : [];
         if(snap.val()) Object.entries(snap.val()).forEach(([id, p]) => {
-            b.innerHTML += `<div class="project-card ${p.color}-gen"><strong>${p.name}</strong><br>${p.address}<br>Slots: ${p.maxGens - p.currentGens} Open<button onclick="window.accept('${id}')" style="margin-top:10px">Claim Generator Slot</button></div>`;
+            b.innerHTML += `<div class="project-card ${p.color}-gen" style="min-width:200px;"><strong>${p.name}</strong><br>${p.address}<br>Slots: ${p.maxGens - p.currentGens} Open<br><button onclick="window.accept('${id}')" style="margin-top:10px; padding:5px; font-size:12px;">Claim Slot</button></div>`;
         });
     });
 
     window.accept = id => {
         const p = window.activeProjectsArr.find(x => x.id === id);
         const user = prompt("Upland Username:");
-        const gens = parseInt(prompt(`Generators to deploy? (Max ${p.maxGens - p.currentGens})`));
+        const gens = parseInt(prompt(`Gens? (Max ${p.maxGens - p.currentGens})`));
         const rules = sparkletRules[p.color];
-        const sparklet = parseInt(prompt(`Sparklet load per gen? (${rules.min.toLocaleString()}-${rules.max.toLocaleString()})`));
-        if(!user || !gens || !sparklet || sparklet < rules.min || sparklet > rules.max) return alert("Invalid entry or load amount.");
+        const sparklet = parseInt(prompt(`Sparklet per gen? (${rules.min}-${rules.max})`));
+        if(!user || !gens || !sparklet || sparklet < rules.min || sparklet > rules.max) return alert("Invalid");
         
         const power = (gens * sparklet) / 1000;
         const hours = p.value / power;
@@ -213,39 +204,43 @@
 
     onValue(ref(db, 'ledgerLog'), snap => {
         window.ledgerArr = snap.val() ? Object.entries(snap.val()).map(([id, d]) => ({id, ...d})) : [];
-        renderUI();
+        renderAll();
     });
 
-    function renderUI() {
+    function renderAll() {
         const adminList = document.getElementById('active-stakes-admin');
         const weeklyBody = document.getElementById('weekly-body');
         const monthlyBody = document.getElementById('monthly-body');
-        const tableHeader = "<tr><th>User</th><th>Property</th><th>Spark</th><th>Payout (95%)</th><th>Date</th></tr>";
+        const leaderboardUI = document.getElementById('leaderboard-ui');
         
-        document.getElementById('weekly-head').innerHTML = tableHeader;
-        document.getElementById('monthly-head').innerHTML = tableHeader;
-        adminList.innerHTML = ""; weeklyBody.innerHTML = ""; monthlyBody.innerHTML = "";
+        adminList.innerHTML = ""; weeklyBody.innerHTML = ""; monthlyBody.innerHTML = ""; leaderboardUI.innerHTML = "";
 
         let totalPower = 0;
         const now = Date.now();
+        const userStats = {};
 
         window.ledgerArr.forEach(s => {
+            userStats[s.subcontractor] = (userStats[s.subcontractor] || 0) + s.activeSpark;
             if(s.status === 'active') {
                 totalPower += s.activeSpark;
                 const remaining = s.endTime - now;
-                const timeStr = remaining > 0 ? formatTime(remaining) : "BUILD COMPLETE";
-                
-                adminList.innerHTML += `<div class="project-card"><strong>${s.name} (${s.subcontractor})</strong><div class="timer-display">${timeStr}</div><button onclick="window.finalize('${s.id}')" style="background:#e67e22">Finalize Construction & Pay</button></div>`;
+                const timeStr = remaining > 0 ? formatTime(remaining) : "DONE";
+                adminList.innerHTML += `<div class="project-card"><strong>${s.name} (${s.subcontractor})</strong><div class="timer-display">${timeStr}</div><button onclick="window.finalize('${s.id}')" style="background:#e67e22; padding:5px; font-size:12px;">Pay</button></div>`;
             } else {
                 const date = new Date(s.timestamp).toLocaleDateString();
-                const row = `<tr><td>${s.subcontractor}</td><td>${s.name}</td><td>${s.activeSpark.toFixed(2)}</td><td>${s.payout.toLocaleString()} UPX</td><td>${date}</td></tr>`;
-                const weekAgo = now - (7 * 24 * 3600 * 1000);
-                const monthAgo = now - (30 * 24 * 3600 * 1000);
-                if(s.timestamp > weekAgo) weeklyBody.innerHTML += row;
-                if(s.timestamp > monthAgo) monthlyBody.innerHTML += row;
+                const row = `<tr><td>${s.subcontractor}</td><td>${s.name}</td><td>${s.payout}</td><td>${date}</td></tr>`;
+                if(s.timestamp > now - 604800000) weeklyBody.innerHTML += row;
+                if(s.timestamp > now - 2592000000) monthlyBody.innerHTML += row;
             }
         });
-        document.getElementById('total-spark-stat').innerText = totalPower.toFixed(2) + " Spark";
+
+        // LEADERBOARD LOGIC
+        const topFleet = Object.entries(userStats).sort((a,b) => b[1] - a[1]).slice(0, 5);
+        topFleet.forEach(([user, power], i) => {
+            leaderboardUI.innerHTML += `<li class="leaderboard-item"><span>#${i+1} ${user}</span><span>${power.toFixed(2)} Spark</span></li>`;
+        });
+        document.getElementById('total-spark-stat').innerText = totalPower.toFixed(2);
+        document.getElementById('top-member').innerText = topFleet[0] ? topFleet[0][0] : "---";
     }
 
     window.finalize = id => {
@@ -265,18 +260,20 @@
     window.populateProperties = () => {
         const cat = document.getElementById('category-select').value;
         const sel = document.getElementById('property-select');
-        document.getElementById('custom-group').style.display = cat === 'custom' ? 'block' : 'none';
-        document.getElementById('property-group').style.display = cat === 'custom' ? 'none' : 'block';
+        const cG = document.getElementById('custom-group');
+        const pG = document.getElementById('property-group');
+        cG.style.display = cat === 'custom' ? 'block' : 'none';
+        pG.style.display = cat === 'custom' ? 'none' : 'block';
         sel.innerHTML = "";
         if(cat && properties[cat]) {
             sel.disabled = false;
-            properties[cat].forEach((p, i) => sel.innerHTML += `<option value="${i}">${p.name} (${p.value.toLocaleString()} Hrs)</option>`);
+            properties[cat].forEach((p, i) => sel.innerHTML += `<option value="${i}">${p.name} (${p.value})</option>`);
         } else sel.disabled = true;
     };
 
     setInterval(() => { 
         document.getElementById('live-clock').innerText = new Date().toLocaleString(); 
-        renderUI(); 
+        renderAll(); 
     }, 1000);
 </script>
 </body>
