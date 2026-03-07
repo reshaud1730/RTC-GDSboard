@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raytown Construction Dispatch Command</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1c23; background-image: linear-gradient(rgba(26, 28, 35, 0.8), rgba(26, 28, 35, 0.95)), url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM0NDRBNTkiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTAgMGg0MHY0MEgwVjB6bTIwIDIwaDIwdjIwSDIWMjB6TTAgMjBoMjB2MjBIMFYyMHoyMCAwaDIwdjIwSDIwVjB6Ii8+PC9nPjwvZz48L3N2Zz4='); background-attachment: fixed; color: #ecf0f1; margin: 0; padding: 20px; background-size: initial, 60px 60px; }
         .container { max-width: 1400px; margin: auto; }
@@ -17,15 +18,15 @@
         select, input { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #34495e; background-color: #1a1c23; color: #ecf0f1; font-size: 16px; box-sizing: border-box; }
         button { background: linear-gradient(135deg, #3498db, #16191f); color: white; border: 1px solid #3498db; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; padding: 12px; border-radius: 5px; transition: 0.2s; }
         button:hover { box-shadow: 0 0 15px rgba(52, 152, 219, 0.7); }
-        .project-card { border-left: 5px solid #bdc3c7; background: #2c3e50; margin-bottom: 15px; padding: 15px; border-radius: 4px; }
+        .project-card { border-left: 5px solid #bdc3c7; background: #2c3e50; margin-bottom: 15px; padding: 15px; border-radius: 4px; position: relative;}
         .timer-display { font-family: 'Courier New', Courier, monospace; font-size: 1.3em; color: #2ecc71; font-weight: bold; margin: 10px 0; background: #16191f; padding: 5px; border-radius: 4px; text-align: center; border: 1px solid #34495e; }
         .ledger-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; color: #ecf0f1; }
         .ledger-table th, .ledger-table td { border: 1px solid #34495e; padding: 8px; text-align: left; }
-        .leaderboard-list { list-style: none; padding: 0; }
         .leaderboard-item { display: flex; justify-content: space-between; padding: 10px; background: #1a1c23; margin-bottom: 5px; border-radius: 4px; border-left: 3px solid #f1c40f; }
         .green-gen { border-left-color: #2ecc71; }
         .red-gen { border-left-color: #e74c3c; }
         .yellow-gen { border-left-color: #f1c40f; }
+        .del-btn { background: #e74c3c; padding: 4px 8px; font-size: 10px; position: absolute; top: 5px; right: 5px; width: auto; margin: 0;}
     </style>
 </head>
 <body>
@@ -45,7 +46,7 @@
 
     <div class="stats-bar">
         <span>Active Spark on Field: <span id="total-spark-stat">0.00</span></span>
-        <span>Fleet Rank: <span style="color:#f1c40f;" id="top-member">---</span></span>
+        <span>Fleet Leader: <span style="color:#f1c40f;" id="top-member">---</span></span>
     </div>
 
     <div class="panels">
@@ -69,14 +70,14 @@
         <div class="panel admin-only">
             <h3>Admin: Control Center</h3>
             <h4 style="color:#e67e22;">Pending Approval Queue</h4>
-            <div id="pending-board" style="max-height: 200px; overflow-y: auto;"></div>
+            <div id="pending-board"></div>
             <h4 style="color:#3498db;">Active Construction Watch</h4>
             <div id="active-stakes-admin"></div>
         </div>
 
         <div class="panel">
             <h3>Fleet Leaderboard</h3>
-            <ul class="leaderboard-list" id="leaderboard-ui"></ul>
+            <div id="leaderboard-ui"></div>
         </div>
     </div>
 
@@ -90,11 +91,11 @@
     <div class="panels" style="margin-top:20px;">
         <div class="panel">
             <h3 style="color:#2ecc71;">Weekly Ledger</h3>
-            <table class="ledger-table"><thead><tr><th>User</th><th>Property</th><th>Payout</th><th>Date</th></tr></thead><tbody id="weekly-body"></tbody></table>
+            <table class="ledger-table"><thead><tr><th>User</th><th>Property</th><th>Payout</th><th>Date</th><th class="admin-only">Action</th></tr></thead><tbody id="weekly-body"></tbody></table>
         </div>
         <div class="panel">
             <h3 style="color:#9b59b6;">Monthly Ledger</h3>
-            <table class="ledger-table"><thead><tr><th>User</th><th>Property</th><th>Payout</th><th>Date</th></tr></thead><tbody id="monthly-body"></tbody></table>
+            <table class="ledger-table"><thead><tr><th>User</th><th>Property</th><th>Payout</th><th>Date</th><th class="admin-only">Action</th></tr></thead><tbody id="monthly-body"></tbody></table>
         </div>
     </div>
 </div>
@@ -137,7 +138,8 @@
 
     onAuthStateChanged(auth, u => {
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = u ? 'block' : 'none');
-        document.getElementById('user-status').innerText = u ? "Mode: Admin" : "Mode: Fleet";
+        document.getElementById('user-status').innerText = u ? "Mode: Admin Control" : "Mode: Fleet View";
+        renderAll(); 
     });
 
     window.submitForApproval = () => {
@@ -159,11 +161,18 @@
         alert("Build Submitted!");
     };
 
+    window.deleteItem = (folder, id) => {
+        if(confirm("Permanently delete this item?")) {
+            remove(ref(db, `${folder}/${id}`));
+        }
+    };
+
     onValue(ref(db, 'pendingProjects'), snap => {
         const b = document.getElementById('pending-board');
         b.innerHTML = "";
         if(snap.val()) Object.entries(snap.val()).forEach(([id, d]) => {
-            b.innerHTML += `<div class="project-card"><strong>${d.name}</strong><br>${d.address}<br><button onclick="window.approve('${id}')" style="background:#2ecc71; padding:5px; font-size:12px;">Approve</button></div>`;
+            const del = auth.currentUser ? `<button class="del-btn" onclick="window.deleteItem('pendingProjects','${id}')">X</button>` : "";
+            b.innerHTML += `<div class="project-card">${del}<strong>${d.name}</strong><br>${d.address}<br><button onclick="window.approve('${id}')" style="background:#2ecc71; padding:5px; font-size:12px;">Approve</button></div>`;
         });
     });
 
@@ -178,7 +187,8 @@
         b.innerHTML = snap.val() ? "" : "<i>No active projects.</i>";
         window.activeProjectsArr = snap.val() ? Object.entries(snap.val()).map(([id, d]) => ({id, ...d})) : [];
         if(snap.val()) Object.entries(snap.val()).forEach(([id, p]) => {
-            b.innerHTML += `<div class="project-card ${p.color}-gen" style="min-width:200px;"><strong>${p.name}</strong><br>${p.address}<br>Slots: ${p.maxGens - p.currentGens} Open<br><button onclick="window.accept('${id}')" style="margin-top:10px; padding:5px; font-size:12px;">Claim Slot</button></div>`;
+            const del = auth.currentUser ? `<button class="del-btn" onclick="window.deleteItem('activeProjects','${id}')">X</button>` : "";
+            b.innerHTML += `<div class="project-card ${p.color}-gen" style="min-width:200px;">${del}<strong>${p.name}</strong><br>${p.address}<br>Slots: ${p.maxGens - p.currentGens} Open<br><button onclick="window.accept('${id}')" style="margin-top:10px; padding:5px; font-size:12px;">Claim Slot</button></div>`;
         });
     });
 
@@ -189,13 +199,12 @@
         const rules = sparkletRules[p.color];
         const sparklet = parseInt(prompt(`Sparklet per gen? (${rules.min}-${rules.max})`));
         if(!user || !gens || !sparklet || sparklet < rules.min || sparklet > rules.max) return alert("Invalid");
-        
         const power = (gens * sparklet) / 1000;
         const hours = p.value / power;
         push(ref(db, 'ledgerLog'), { 
             name: p.name, address: p.address, subcontractor: user, activeSpark: power, 
             status: 'active', timestamp: Date.now(), hoursNeeded: hours, color: p.color,
-            endTime: Date.now() + (hours * 3600000)
+            endTime: Date.now() + (hours * 3600000), sparkletPerGen: sparklet, genCount: gens
         });
         const nc = p.currentGens + gens;
         if(nc >= p.maxGens) remove(ref(db, `activeProjects/${id}`));
@@ -212,7 +221,8 @@
         const weeklyBody = document.getElementById('weekly-body');
         const monthlyBody = document.getElementById('monthly-body');
         const leaderboardUI = document.getElementById('leaderboard-ui');
-        
+        const isAdmin = auth.currentUser;
+
         adminList.innerHTML = ""; weeklyBody.innerHTML = ""; monthlyBody.innerHTML = ""; leaderboardUI.innerHTML = "";
 
         let totalPower = 0;
@@ -221,33 +231,67 @@
 
         window.ledgerArr.forEach(s => {
             userStats[s.subcontractor] = (userStats[s.subcontractor] || 0) + s.activeSpark;
+            const delBtn = isAdmin ? `<button class="del-btn" onclick="window.deleteItem('ledgerLog','${s.id}')">X</button>` : "";
+            
             if(s.status === 'active') {
                 totalPower += s.activeSpark;
                 const remaining = s.endTime - now;
                 const timeStr = remaining > 0 ? formatTime(remaining) : "DONE";
-                adminList.innerHTML += `<div class="project-card"><strong>${s.name} (${s.subcontractor})</strong><div class="timer-display">${timeStr}</div><button onclick="window.finalize('${s.id}')" style="background:#e67e22; padding:5px; font-size:12px;">Pay</button></div>`;
+                adminList.innerHTML += `<div class="project-card">${delBtn}<strong>${s.name} (${s.subcontractor})</strong><div class="timer-display">${timeStr}</div><button onclick="window.finalize('${s.id}')" style="background:#e67e22; padding:5px; font-size:12px;">Pay Out</button></div>`;
             } else {
                 const date = new Date(s.timestamp).toLocaleDateString();
-                const row = `<tr><td>${s.subcontractor}</td><td>${s.name}</td><td>${s.payout}</td><td>${date}</td></tr>`;
+                const row = `<tr><td>${s.subcontractor}</td><td>${s.name}</td><td>${s.payout}</td><td>${date}</td><td class="admin-only">${delBtn}</td></tr>`;
                 if(s.timestamp > now - 604800000) weeklyBody.innerHTML += row;
                 if(s.timestamp > now - 2592000000) monthlyBody.innerHTML += row;
             }
         });
 
-        // LEADERBOARD LOGIC
         const topFleet = Object.entries(userStats).sort((a,b) => b[1] - a[1]).slice(0, 5);
         topFleet.forEach(([user, power], i) => {
-            leaderboardUI.innerHTML += `<li class="leaderboard-item"><span>#${i+1} ${user}</span><span>${power.toFixed(2)} Spark</span></li>`;
+            leaderboardUI.innerHTML += `<div class="leaderboard-item"><span>#${i+1} ${user}</span><span>${power.toFixed(2)} Spark</span></div>`;
         });
         document.getElementById('total-spark-stat').innerText = totalPower.toFixed(2);
         document.getElementById('top-member').innerText = topFleet[0] ? topFleet[0][0] : "---";
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'table-cell' : 'none');
     }
 
-    window.finalize = id => {
+    window.finalize = (id) => {
         const s = window.ledgerArr.find(x => x.id === id);
         const h = Math.min(s.hoursNeeded, (Date.now() - s.timestamp) / 3600000);
         const p = Math.floor((s.activeSpark * h) * 0.95);
+        
+        // NEW: Automatic PDF Generation on Finalize
+        window.generateInvoice(s, p);
+
         update(ref(db, `ledgerLog/${id}`), { status: 'finished', payout: p, timestamp: Date.now() });
+    };
+
+    window.generateInvoice = (data, finalPayout) => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFontSize(22);
+        doc.text("RAYTOWN CONSTRUCTION", 20, 20);
+        doc.setFontSize(12);
+        doc.text("Project Payout Receipt", 20, 30);
+        doc.line(20, 35, 190, 35);
+        
+        doc.text(`Subcontractor: ${data.subcontractor}`, 20, 50);
+        doc.text(`Property: ${data.name}`, 20, 60);
+        doc.text(`Address: ${data.address}`, 20, 70);
+        
+        doc.text(`Generators Deployed: ${data.genCount}`, 20, 90);
+        doc.text(`Sparklet per Gen: ${data.sparkletPerGen}`, 20, 100);
+        doc.text(`Total Spark Power: ${data.activeSpark.toFixed(2)}`, 20, 110);
+        
+        doc.setFontSize(16);
+        doc.text(`TOTAL PAYOUT (95%): ${finalPayout.toLocaleString()} UPX`, 20, 130);
+        
+        doc.setFontSize(10);
+        doc.text("Thank you for building with the Raytown Fleet.", 20, 150);
+        doc.text(`Issued: ${new Date().toLocaleString()}`, 20, 160);
+        
+        doc.save(`${data.subcontractor}_Invoice.pdf`);
     };
 
     function formatTime(ms) {
